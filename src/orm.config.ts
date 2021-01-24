@@ -8,7 +8,7 @@ export const config: TypeOrmModuleOptions = {
     username: 'gesproman_admin',
     password: 'jorgevela',
     database: 'gesproman',
-    synchronize: true,
+    synchronize: false,
     logging: true,
     entities: [join(__dirname, './**/*.entity{.ts,.js}')],
 }
