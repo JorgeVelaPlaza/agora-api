@@ -1,23 +1,49 @@
-import { Injectable } from '@nestjs/common';
-import { Customer } from './customer.model';
-import { TypeOrmCrudService } from '@nestjsx/crud-typeorm'
-import { InjectRepository } from '@nestjs/typeorm';
-
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import CreateCustomerDto from './dto/createCustomer.dto';
+import Customer from './customer.interface';
+import UpdateCustomerDto from './dto/updateCustomer.dto';
+ 
 @Injectable()
-export class CustomersService extends TypeOrmCrudService<Customer>{
-  constructor(@InjectRepository(Customer) repo){
-    super(repo)
+export default class CustomersService {
+  private lastCustomerId = 0;
+  private customers: Customer[] = [];
+ 
+  getAllCustomers() {
+    return this.customers;
   }
-
-  /* addCustomer(
-    name: string,
-    surname: string,
-    lastSurname: string,
-    phone: string,
-    email: string,
-  ): string {
-    const newCustomer = new Customer(name, surname, lastSurname, phone, email);
+ 
+  getCustomerById(id: number) {
+    const customer = this.customers.find(customer => customer.id === id);
+    if (customer) {
+      return customer;
+    }
+    throw new HttpException('Customer not found', HttpStatus.NOT_FOUND);
+  }
+ 
+  replaceCustomer(id: number, customer: UpdateCustomerDto) {
+    const customerIndex = this.customers.findIndex(customer => customer.id === id);
+    if (customerIndex > -1) {
+      this.customers[customerIndex] = customer;
+      return customer;
+    }
+    throw new HttpException('Customer not found', HttpStatus.NOT_FOUND);
+  }
+ 
+  createCustomer(customer: CreateCustomerDto) {
+    const newCustomer = {
+      id: ++this.lastCustomerId,
+      ...customer
+    }
     this.customers.push(newCustomer);
-    return JSON.stringify(newCustomer);
-  } */
+    return newCustomer;
+  }
+ 
+  deleteCustomer(id: number) {
+    const customerIndex = this.customers.findIndex(customer => customer.id === id);
+    if (customerIndex > -1) {
+      this.customers.splice(customerIndex, 1);
+    } else {
+      throw new HttpException('Customer not found', HttpStatus.NOT_FOUND);
+    }
+  }
 }
